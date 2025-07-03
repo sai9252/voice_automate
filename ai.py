@@ -235,7 +235,7 @@ def analyse_audio_transcript_copy():
     
     # Example usage 2: Process audio[0] from directory
     # directory_path = input("Enter the path to your audio directory:").strip()
-    directory_path = r"C:\Users\M sai\Downloads"
+    directory_path = r"C:\Users\msai9\Downloads"
     
     try:
         # Process the first audio file (index 0) from the directory

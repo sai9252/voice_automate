@@ -9,7 +9,7 @@ class AutomationBot:
     def __init__(self):
         pyautogui.FAILSAFE = True
         self.setup_delay = 1
-        self.action_delay = 0.2
+        self.action_delay = 0.3
         self.reload_wait = 4
         self.background_results = {}
         self.background_exceptions = {}  # Store exceptions from background tasks
@@ -91,8 +91,8 @@ class AutomationBot:
         if self._stop_requested:
             self.check_background_exceptions()
         print("--- Initial Setup Clicks ---")
-        self.click_at(753, 1005)
-        self.click_at(660, 725)
+        self.click_at(800, 950)
+        self.click_at(605, 690)
     
     def reload_page(self):
         """Reload current page and wait"""
@@ -116,7 +116,7 @@ class AutomationBot:
             self.check_background_exceptions()
             
         pyautogui.scroll(-500)
-        self.click_at(705, 1035)
+        self.click_at(529, 900)
         
         self.click_at(*paste_coords)
         self.hotkey_press('ctrl', 'a')
@@ -133,8 +133,8 @@ class AutomationBot:
             
         print("--- Processing Main Actions ---")
         self.click_at(1250, 383, clicks=2)
-        self.click_at(1114, 705)
-        self.click_at(1000, 640)
+        self.click_at(1118, 680)
+        self.click_at(1015, 617)
         self.hotkey_press('ctrl', 'w')
     
     def run_iteration(self, iteration_num, total_iterations):
@@ -179,7 +179,7 @@ class AutomationBot:
         self.window_snap('left')
         
         # Copy-paste workflow - Right side
-        additional_clicks = [(857, 665), (572, 785), (590, 1095)]
+        additional_clicks = [(857, 649), (574, 742), (590, 1020)]
         self.wait_for_background_task(right_task_id)  # This will check for exceptions
         self.copy_paste_workflow((575, 950), additional_clicks)
         self.window_snap('right')

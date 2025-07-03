@@ -7,3 +7,5 @@ pyperclip==1.9.0
 pyrect==0.2.0
 pyscreeze==1.0.1
 pytweening==1.2.0
+google-genai
+python-dotenv
