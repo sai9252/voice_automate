@@ -19,7 +19,14 @@ class AudioTranscriber:
         Args:
             api_key (str): Your Gemini API key. If None, will look for GEMINI_API_KEY environment variable
         """
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        # self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+
+        if api_key is None:
+            print("i am getting from .env")
+            api_key = os.getenv("GEMINI_API_KEY")
+
+        self.api_key= api_key
+
         print(f"API Key: {self.api_key}")
         if not self.api_key:
             raise ValueError("API key is required. Set GEMINI_API_KEY environment variable or pass api_key parameter")
@@ -222,12 +229,12 @@ Give JUST the transcript now."""),
         self.transcribed_texts.clear()
 
 # Main function to use the transcriber
-def analyse_audio_transcript_copy():
+def analyse_audio_transcript_copy(api_key=None):
     """
     Example usage of the AudioTranscriber
     """
     # Initialize transcriber (make sure to set your API key)
-    transcriber = AudioTranscriber()
+    transcriber = AudioTranscriber(api_key)
     
     # Example usage 1: Process specific audio file
     # audio_path = "/path/to/your/audio/file.mp3"
@@ -235,7 +242,7 @@ def analyse_audio_transcript_copy():
     
     # Example usage 2: Process audio[0] from directory
     # directory_path = input("Enter the path to your audio directory:").strip()
-    directory_path = r"C:\Users\msai9\Downloads"
+    directory_path = r"C:\Users\Nanda\Downloads"
     
     try:
         # Process the first audio file (index 0) from the directory
@@ -272,7 +279,7 @@ def main():
     
     # Example usage 2: Process audio[0] from directory
     # directory_path = input("Enter the path to your audio directory:").strip()
-    directory_path = r"C:\Users\M sai\Downloads"
+    directory_path = r"C:\Users\Nanda\Downloads"
     
     try:
         # Process the first audio file (index 0) from the directory

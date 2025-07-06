@@ -5,16 +5,22 @@ import sys
 from ai import analyse_audio_transcript_copy
 
 
+API_KEYS = ["AIzaSyCtVcmwLzABVykY-1YKwMM66tCwSake-ec","AIzaSyBtVTsFNm0HWiWR8WIwQFHOszNotZpKigs","AIzaSyDlHJayH_4bV1A85fvUhGXmkXD-VVKOfbs","AIzaSyB6woe43tn0-Rprh6hfJ0W1UKDnsnoRZF8","AIzaSyBj6N89c343uCeJci_Px34i8pevUWZLuKc"]
+
+
 class AutomationBot:
     def __init__(self):
         pyautogui.FAILSAFE = True
         self.setup_delay = 1
-        self.action_delay = 0.3
-        self.reload_wait = 4
+        self.action_delay = 0.1
+        self.reload_delay = 1
+        self.pixel_position = (1255, 821)  # Change this to the position of your green button
+        self.check_interval = 2
         self.background_results = {}
         self.background_exceptions = {}  # Store exceptions from background tasks
         self.background_threads = []
-        self._stop_requested = False  # Flag to stop iterations
+        self._stop_requested = False 
+        self.index = 0 # Flag to stop iterations
         
     def wait(self, seconds=None):
         """Smart wait with default action delay"""
@@ -37,26 +43,38 @@ class AutomationBot:
         self.wait()
     
     def run_background_analysis(self, task_id):
-        """Run audio analysis in background thread with exception handling"""
         def background_task():
             print(f"Starting background analysis {task_id}...")
-            try:
-                result = analyse_audio_transcript_copy()
-                self.background_results[task_id] = result
-                self.background_exceptions[task_id] = None  # No exception
-                print(f"Background analysis {task_id} completed")
-            except Exception as e:
-                print(f"Background analysis {task_id} failed: {e}")
-                # Store the full exception info for later re-raising
-                self.background_exceptions[task_id] = sys.exc_info()
-                self.background_results[task_id] = None
-                self._stop_requested = True  # Signal main thread to stop
-        
+            for i, api_key in enumerate(API_KEYS):
+                try:
+                    print(f"[{task_id}] Trying API key {i + 1}/{len(API_KEYS)}")
+                    result = analyse_audio_transcript_copy(api_key)
+                    self.background_results[task_id] = result
+                    self.background_exceptions[task_id] = None
+                    print(f"[{task_id}] Analysis successful.")
+                    return
+                except Exception as e:
+                    if "RESOURCE_EXHAUSTED" in str(e) or "INVALID_API_KEY" in str(e):
+                        print(f"[{task_id}] API key {i + 1} exhausted: {e}")
+                        continue
+                    else:
+                        print(f"[{task_id}] Fatal error: {e}")
+                        self.background_results[task_id] = None
+                        self.background_exceptions[task_id] = sys.exc_info()
+                        self._stop_requested = True
+                        return
+
+            print(f"[{task_id}] All API keys failed.")
+            self.background_results[task_id] = None
+            self.background_exceptions[task_id] = (Exception("All API keys failed"), None, None)
+            self._stop_requested = True
+
         thread = threading.Thread(target=background_task, name=f"analysis_{task_id}")
         thread.daemon = True
         thread.start()
         self.background_threads.append(thread)
         return thread
+
     
     def check_background_exceptions(self):
         """Check if any background tasks have failed and raise their exceptions"""
@@ -91,8 +109,8 @@ class AutomationBot:
         if self._stop_requested:
             self.check_background_exceptions()
         print("--- Initial Setup Clicks ---")
-        self.click_at(800, 950)
-        self.click_at(605, 690)
+        self.click_at(900, 865)
+        self.click_at(670, 590)
     
     def reload_page(self):
         """Reload current page and wait"""
@@ -100,7 +118,7 @@ class AutomationBot:
             self.check_background_exceptions()
         print("Reloading page...")
         self.hotkey_press('ctrl', 'r')
-        self.wait(self.reload_wait)
+        self.wait(self.reload_delay)
     
     def switch_tab(self, tab_number):
         """Switch to specified tab"""
@@ -116,7 +134,7 @@ class AutomationBot:
             self.check_background_exceptions()
             
         pyautogui.scroll(-500)
-        self.click_at(529, 900)
+        self.click_at(545, 825)
         
         self.click_at(*paste_coords)
         self.hotkey_press('ctrl', 'a')
@@ -125,6 +143,46 @@ class AutomationBot:
         if additional_clicks:
             for coords in additional_clicks:
                 self.click_at(*coords)
+
+    
+    def is_green(self, rgb, tolerance=30):
+        """Check if the color is green based on RGB and tolerance."""
+        r, g, b = rgb
+        print(f"🔍 Comparing R: {r}, G: {g}, B: {b} with tolerance: {tolerance}")
+        is_green_result = (
+            g > r + tolerance and
+            g > b + tolerance and
+            g > 100
+        )
+        print(f"🧪 Green detection result: {is_green_result}")
+        return is_green_result
+
+    
+    def monitor_pixel_and_act(self):
+        """Monitor a pixel and trigger automation if green is detected."""
+        print("👀 Monitoring pixel for green color...")
+        
+
+        for i in range(0,1000):
+            # Take a screenshot
+            screenshot = pyautogui.screenshot()
+
+            # Save the screenshot
+            # self.save_screenshot(screenshot)
+
+            # Get pixel color
+            pixel_color = screenshot.getpixel(self.pixel_position)
+            print(f"🎯 Pixel color at {self.pixel_position}: {pixel_color}")
+
+            # Check if the pixel is green
+            if self.is_green(pixel_color):
+                print("✅ Green color detected! Running main automation sequence...")
+                self.main_automation_sequence()
+                break  # Exit the loop after executing the automation
+            else:
+                print("❌ Green not detected. Retrying after delay...")
+                time.sleep(self.check_interval) 
+                # self.reload_page()
     
     def main_automation_sequence(self):
         """Execute the main automation sequence"""
@@ -132,9 +190,10 @@ class AutomationBot:
             self.check_background_exceptions()
             
         print("--- Processing Main Actions ---")
-        self.click_at(1250, 383, clicks=2)
-        self.click_at(1118, 680)
-        self.click_at(1015, 617)
+        self.click_at(1322, 821, clicks=2)
+        self.click_at(1085, 600)
+        self.wait( self.action_delay)
+        self.click_at(1000, 535)
         self.hotkey_press('ctrl', 'w')
     
     def run_iteration(self, iteration_num, total_iterations):
@@ -156,7 +215,7 @@ class AutomationBot:
         # First sequence - Right side
         self.reload_page()
         pyautogui.scroll(-500)
-        self.main_automation_sequence()
+        self.monitor_pixel_and_act()
         
         # Start background analysis for right side
         right_task_id = f"right_{iteration_num}"
@@ -170,24 +229,24 @@ class AutomationBot:
         # Second sequence - Left side  
         self.reload_page()
         pyautogui.scroll(-500)
-        self.main_automation_sequence()
+        self.monitor_pixel_and_act()
 
-        # Start background analysis for left side
-        left_task_id = f"left_{iteration_num}"
-        self.run_background_analysis(left_task_id)
         
         self.window_snap('left')
         
         # Copy-paste workflow - Right side
-        additional_clicks = [(857, 649), (574, 742), (590, 1020)]
+        additional_clicks = [(950, 625), (600, 697), (625, 927)]
         self.wait_for_background_task(right_task_id)  # This will check for exceptions
-        self.copy_paste_workflow((575, 950), additional_clicks)
+        self.copy_paste_workflow((545, 825), additional_clicks)
+        # Start background analysis for left side
+        left_task_id = f"left_{iteration_num}"
+        self.run_background_analysis(left_task_id)
         self.window_snap('right')
                 
         pyautogui.scroll(-500)
         # Copy-paste workflow - Left side
         self.wait_for_background_task(left_task_id)  # This will check for exceptions
-        self.copy_paste_workflow((575, 950), additional_clicks)
+        self.copy_paste_workflow((545, 825), additional_clicks)
         self.window_snap('left')
         
         print(f"Iteration {iteration_num} completed")
@@ -197,7 +256,7 @@ class AutomationBot:
         print("Waiting for all background threads to complete...")
         for thread in self.background_threads:
             if thread.is_alive():
-                thread.join(timeout=10)
+                thread.join(timeout=8)
 
 
 def main():
