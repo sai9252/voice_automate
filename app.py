@@ -5,7 +5,7 @@ import sys
 from ai import analyse_audio_transcript_copy
 
 
-API_KEYS = ["AIzaSyCtVcmwLzABVykY-1YKwMM66tCwSake-ec","AIzaSyBtVTsFNm0HWiWR8WIwQFHOszNotZpKigs","AIzaSyDlHJayH_4bV1A85fvUhGXmkXD-VVKOfbs","AIzaSyB6woe43tn0-Rprh6hfJ0W1UKDnsnoRZF8","AIzaSyBj6N89c343uCeJci_Px34i8pevUWZLuKc"]
+API_KEYS = ["AIzaSyBj6N89c343uCeJci_Px34i8pevUWZLuKc","AIzaSyCtVcmwLzABVykY-1YKwMM66tCwSake-ec","AIzaSyBtVTsFNm0HWiWR8WIwQFHOszNotZpKigs","AIzaSyDlHJayH_4bV1A85fvUhGXmkXD-VVKOfbs","AIzaSyB6woe43tn0-Rprh6hfJ0W1UKDnsnoRZF8"]
 
 
 class AutomationBot:

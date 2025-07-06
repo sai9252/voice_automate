@@ -135,7 +135,7 @@ Give JUST the transcript now."""),
         except Exception as e:
             error_msg = f"Error transcribing audio: {str(e)}"
             print(error_msg)
-            raise error_msg
+            raise 
         
     def delete_file(self, file_path):
         """
@@ -200,7 +200,7 @@ Give JUST the transcript now."""),
         except Exception as e:
             error_msg = f"Error processing directory v1: {str(e)}"
             print(error_msg)
-            raise error_msg
+            raise 
     
     def copy_to_clipboard(self, text):
         """
@@ -262,7 +262,7 @@ def analyse_audio_transcript_copy(api_key=None):
         
     except Exception as e:
         print(f"Error: {str(e)}")
-        raise e
+        raise 
 
 
 # Main function to use the transcriber
